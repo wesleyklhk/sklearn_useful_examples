@@ -13,6 +13,8 @@ X1 = np.arange(1,11)
 X2 = X1**2
 
 y = np.array(['LOW'] * 5 + ['HI'] * 5)
+le = LabelEncoder()
+y = le.fit_transform(y)
 
 
 X = pd.DataFrame({'X1':X1,'X2':X2}).values
@@ -34,9 +36,6 @@ ps = PredefinedSplit(test_fold)
 
 
 ########search for parameters using own scoring function
-le = LabelEncoder()
-y = le.fit_transform(y)
-
 def my_own_scorer(clf, X, y_true):
     class_labels = clf.classes_
     loss = log_loss(y_true,clf.predict_proba(X),class_labels)
@@ -49,21 +48,18 @@ tols = [0.01,0.03]
 gs = GridSearchCV(
         estimator=LogisticRegression(random_state=0), ######machine learning algorithm
         param_grid={'C': Cs,'tol':tols},#####list of parameters to search for
-        cv=ps.split(), #######evaluate performance on training and validation set
+        cv=ps.split(), #######evaluate performance on training and validation set; in this case, we are using a predefined training and validation set
         verbose=True,
         scoring=my_own_scorer######evaluate the performance using this scoring function
         )
 
 model = gs.fit(X,y)
 
-print(pd.DataFrame(model.cv_results_) )
+print(pd.DataFrame(model.cv_results_) )#####results are available in here
 
 
 
 ########search for parameters using sklearn predefined scorer
-le = LabelEncoder()
-y = le.fit_transform(y)
-
 Cs = [0.1,0.3,0.5,1,3,5]
 tols = [0.01,0.03]
 
@@ -71,12 +67,12 @@ tols = [0.01,0.03]
 gs = GridSearchCV(
         estimator=LogisticRegression(random_state=0), ######machine learning algorithm
         param_grid={'C': Cs,'tol':tols},#####list of parameters to search for
-        cv=ps.split(), #######evaluate performance on training and validation set
+        cv=ps.split(), #######evaluate performance on training and validation set; in this case, we are using a predefined training and validation set
         verbose=True,
-        scoring=neg_log_loss_scorer######evaluate the performance using this scoring function
+        scoring=neg_log_loss_scorer######this is a sklearn out of the box scoring function
         )
 
 model = gs.fit(X,y)
 
-print( pd.DataFrame(model.cv_results_) )
+print(pd.DataFrame(model.cv_results_) )#####results are available in here
 
